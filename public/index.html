@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Redis + PHP To-Do App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="todo">
+    <h2>📝 My To-Do List</h2>
+    <input type="text" id="taskInput" placeholder="Enter a task...">
+    <button onclick="addTask()">Add</button>
+
+    <ul id="taskList"></ul>
+</div>
+
+<script>
+const API_URL = "../api/";
+
+async function loadTasks() {
+    let res = await fetch(API_URL + "getTasks.php");
+    let tasks = await res.json();
+
+    let list = document.getElementById("taskList");
+    list.innerHTML = "";
+    tasks.forEach(task => {
+        let li = document.createElement("li");
+        li.innerHTML = task + 
+            " <button onclick='deleteTask(\"" + task + "\")'>❌</button>";
+        list.appendChild(li);
+    });
+}
+
+async function addTask() {
+    let input = document.getElementById("taskInput");
+    let task = input.value.trim();
+    if (!task) return;
+
+    await fetch(API_URL + "addTask.php", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({task})
+    });
+    input.value = "";
+    loadTasks();
+}
+
+async function deleteTask(task) {
+    await fetch(API_URL + "deleteTask.php", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({task})
+    });
+    loadTasks();
+}
+
+loadTasks();
+</script>
+</body>
+</html>
